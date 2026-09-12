@@ -1,0 +1,29 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Test') {
+            steps {
+                echo 'Running tests...'
+            }
+        }
+
+        stage('Build') {
+            steps {
+                echo 'Building Docker images...'
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                echo 'Deploying to EKS...'
+            }
+        }
+    }
+}

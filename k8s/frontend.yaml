@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: three-tier-devsecops
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: 772607728035.dkr.ecr.ap-south-1.amazonaws.com/three-tier-devsecops/frontend:latest
+          ports:
+            - containerPort: 3000
+
+          env:
+            - name: REACT_APP_BACKEND_URL
+              value: "http://backend:3500/api/tasks"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+  namespace: three-tier-devsecops
+spec:
+  type: LoadBalancer
+  selector:
+    app: frontend
+  ports:
+    - port: 80
+      targetPort: 3000

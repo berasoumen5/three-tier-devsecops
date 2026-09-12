@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: three-tier-devsecops
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: backend
+          image: 772607728035.dkr.ecr.ap-south-1.amazonaws.com/three-tier-devsecops/backend:latest
+          ports:
+            - containerPort: 3500
+
+          env:
+            - name: PORT
+              value: "3500"
+
+            - name: USE_DB_AUTH
+              value: "true"
+
+            - name: MONGO_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb-secret
+                  key: username
+
+            - name: MONGO_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb-secret
+                  key: password
+
+            - name: MONGO_CONN_STR
+              value: "mongodb://mongodb:27017/tasks?authSource=admin"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  namespace: three-tier-devsecops
+spec:
+  selector:
+    app: backend
+  ports:
+    - port: 3500
+      targetPort: 3500
