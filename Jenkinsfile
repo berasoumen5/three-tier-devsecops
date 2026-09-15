@@ -35,8 +35,8 @@ pipeline {
         stage('4. Trivy Security Scan') {
             steps {
                 sh '''
-                    trivy image --severity HIGH,CRITICAL three-tier-backend:latest
-                    trivy image --severity HIGH,CRITICAL three-tier-frontend:latest
+                    trivy image --exit-code 1 --severity HIGH,CRITICAL three-tier-backend:latest
+                    trivy image --exit-code 1 --severity HIGH,CRITICAL three-tier-frontend:latest
                 '''
             }
         }
