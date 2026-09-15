@@ -11,19 +11,19 @@ pipeline {
 
     stages {
 
-        stage('Checkout') {
+        stage('1. Checkout') {
             steps {
                 checkout scm
             }
         }
 
-        stage('Test') {
+        stage('2. Test') {
             steps {
-                echo 'Running tests...'
+                echo 'Running application tests...'
             }
         }
 
-        stage('Build Docker Images') {
+        stage('3. Build Docker Images') {
             steps {
                 sh '''
                     docker build -t three-tier-backend:latest ./Application-Code/backend
@@ -32,7 +32,16 @@ pipeline {
             }
         }
 
-        stage('Push Images to ECR') {
+        stage('4. Trivy Security Scan') {
+            steps {
+                sh '''
+                    trivy image --severity HIGH,CRITICAL three-tier-backend:latest
+                    trivy image --severity HIGH,CRITICAL three-tier-frontend:latest
+                '''
+            }
+        }
+
+        stage('5. Push Images to ECR') {
             steps {
                 sh '''
                     aws ecr get-login-password --region "$AWS_REGION" | \
@@ -47,9 +56,9 @@ pipeline {
             }
         }
 
-        stage('Deploy') {
+        stage('6. Deployment') {
             steps {
-                echo 'Deploying to EKS...'
+                echo 'Deployment is handled by Argo CD.'
             }
         }
     }
