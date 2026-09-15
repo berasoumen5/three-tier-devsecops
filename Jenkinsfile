@@ -2,6 +2,7 @@ pipeline {
     agent any
 
     stages {
+
         stage('Checkout') {
             steps {
                 checkout scm
@@ -14,9 +15,12 @@ pipeline {
             }
         }
 
-        stage('Build') {
+        stage('Build Docker Images') {
             steps {
-                echo 'Building Docker images...'
+                sh '''
+                    docker build -t three-tier-backend:latest ./Application-Code/backend
+                    docker build -t three-tier-frontend:latest ./Application-Code/frontend
+                '''
             }
         }
 
