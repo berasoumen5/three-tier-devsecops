@@ -69,10 +69,35 @@ pipeline {
             }
         }
 
-        stage('7. Deployment') {
+        stage('7. Update Kubernetes Manifests') {
             steps {
-                echo "Image ${IMAGE_TAG} pushed to ECR."
-                echo 'Deployment is handled by Argo CD.'
+                sh '''
+                    sed -i "s|backend:.*|backend:${IMAGE_TAG}|" k8s/backend.yaml
+                    sed -i "s|frontend:.*|frontend:${IMAGE_TAG}|" k8s/frontend.yaml
+                '''
+            }
+        }
+
+        stage('8. Commit and Push Git Changes') {
+            steps {
+                sh '''
+                    git config user.name "Jenkins"
+                    git config user.email "jenkins@localhost"
+
+                    git add k8s/backend.yaml k8s/frontend.yaml
+
+                    git commit -m "Update images to ${IMAGE_TAG}" || echo "No changes to commit"
+
+                    git push origin HEAD:main
+                '''
+            }
+        }
+
+        stage('9. Deployment') {
+            steps {
+                echo "Images ${IMAGE_TAG} pushed to ECR."
+                echo "Kubernetes manifests updated in Git."
+                echo "Argo CD will synchronize the changes."
             }
         }
     }
