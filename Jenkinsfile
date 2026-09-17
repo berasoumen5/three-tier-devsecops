@@ -17,47 +17,61 @@ pipeline {
             }
         }
 
-        stage('2. Test') {
+        stage('2. Get Git SHA') {
+            steps {
+                script {
+                    env.IMAGE_TAG = sh(
+                        script: 'git rev-parse --short HEAD',
+                        returnStdout: true
+                    ).trim()
+
+                    echo "Docker image tag: ${env.IMAGE_TAG}"
+                }
+            }
+        }
+
+        stage('3. Test') {
             steps {
                 echo 'Running application tests...'
             }
         }
 
-        stage('3. Build Docker Images') {
+        stage('4. Build Docker Images') {
             steps {
                 sh '''
-                    docker build -t three-tier-backend:latest ./Application-Code/backend
-                    docker build -t three-tier-frontend:latest ./Application-Code/frontend
+                    docker build -t three-tier-backend:${IMAGE_TAG} ./Application-Code/backend
+                    docker build -t three-tier-frontend:${IMAGE_TAG} ./Application-Code/frontend
                 '''
             }
         }
 
-        stage('4. Trivy Security Scan') {
+        stage('5. Trivy Security Scan') {
             steps {
                 sh '''
-                    trivy image --severity HIGH,CRITICAL three-tier-backend:latest
-                    trivy image --severity HIGH,CRITICAL three-tier-frontend:latest
+                    trivy image --severity HIGH,CRITICAL three-tier-backend:${IMAGE_TAG}
+                    trivy image --severity HIGH,CRITICAL three-tier-frontend:${IMAGE_TAG}
                 '''
             }
         }
 
-        stage('5. Push Images to ECR') {
+        stage('6. Push Images to ECR') {
             steps {
                 sh '''
                     aws ecr get-login-password --region "$AWS_REGION" | \
                     docker login --username AWS --password-stdin "$ECR_REGISTRY"
 
-                    docker tag three-tier-backend:latest "$BACKEND_IMAGE:latest"
-                    docker tag three-tier-frontend:latest "$FRONTEND_IMAGE:latest"
+                    docker tag three-tier-backend:${IMAGE_TAG} "$BACKEND_IMAGE:${IMAGE_TAG}"
+                    docker tag three-tier-frontend:${IMAGE_TAG} "$FRONTEND_IMAGE:${IMAGE_TAG}"
 
-                    docker push "$BACKEND_IMAGE:latest"
-                    docker push "$FRONTEND_IMAGE:latest"
+                    docker push "$BACKEND_IMAGE:${IMAGE_TAG}"
+                    docker push "$FRONTEND_IMAGE:${IMAGE_TAG}"
                 '''
             }
         }
 
-        stage('6. Deployment') {
+        stage('7. Deployment') {
             steps {
+                echo "Image ${IMAGE_TAG} pushed to ECR."
                 echo 'Deployment is handled by Argo CD.'
             }
         }
