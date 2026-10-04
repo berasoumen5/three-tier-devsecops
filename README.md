@@ -1,6 +1,6 @@
 # Three-Tier DevSecOps MERN Application
 
-This is a beginner-friendly end-to-end DevSecOps project demonstrating how to build, containerize, deploy, secure, and monitor a three-tier MERN application on AWS using Terraform, Jenkins, Docker, Amazon ECR, Amazon EKS, Argo CD, Trivy, Prometheus, and Grafana.
+This is a beginner-friendly end-to-end DevSecOps project built by Soumen demonstrating how to build, containerize, deploy, secure, and monitor a three-tier MERN application on AWS using Terraform, Jenkins, Docker, Amazon ECR, Amazon EKS, Argo CD, Trivy, Prometheus, and Grafana.
 
 ---
 
