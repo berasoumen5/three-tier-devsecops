@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: 772607728035.dkr.ecr.ap-south-1.amazonaws.com/three-tier-devsecops/frontend:0aa7699
+          image: 772607728035.dkr.ecr.ap-south-1.amazonaws.com/three-tier-devsecops/frontend:c817dfa
           ports:
             - containerPort: 3000
 
